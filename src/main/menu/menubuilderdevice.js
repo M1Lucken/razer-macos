@@ -225,6 +225,12 @@ function getFeatureRipple(application, device, feature) {
       singleItem('Red', [0xff, 0, 0]),
       singleItem('Green', [0, 0xff, 0]),
       singleItem('Blue', [0, 0, 0xff]),
+      {
+        label: 'White starlight + ripple',
+        click() {
+          device.setStarlightRipple(feature.configuration);
+        },
+      },
     ],
   };
 }

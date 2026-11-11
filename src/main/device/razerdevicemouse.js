@@ -152,6 +152,14 @@ export class RazerDeviceMouse extends RazerDevice {
     this.addon.mouseSetLogoLEDEffect(this.internalId, effect);
   }
 
+  applyStartupEffect() {
+    if (this.hasFeature(FeatureIdentifier.OLD_MOUSE_EFFECTS) && !this.hasFeature(FeatureIdentifier.STATIC)) {
+      this.setLogoLEDEffect('pulsate');
+      return true;
+    }
+    return false;
+  }
+
   getDPI() {
     return this.dpi;
   }

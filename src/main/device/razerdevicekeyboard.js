@@ -1,16 +1,22 @@
 import { RazerDevice } from './razerdevice';
 import { RazerAnimationRipple } from '../animation/animationripple';
 import { RazerAnimationWheel } from '../animation/animationwheel';
+import { RazerAnimationStarlightRipple } from '../animation/animationstarlightripple';
+import { FeatureIdentifier } from '../feature/featureidentifier';
 
 export class RazerDeviceKeyboard extends RazerDevice {
   constructor(addon, settingsManager, stateManager, razerProperties) {
     super(addon, settingsManager, stateManager, razerProperties);
     this.rippleAnimation = null;
     this.wheelAnimation = null;
+    this.starlightRippleAnimation = null;
   }
 
   async init() {
     this.brightness = this.addon.KbdGetBrightness(this.internalId);
+    if (this.productId === 0x021a && !this.brightness) {
+      this.setBrightness(100);
+    }
     return super.init();
   }
 
@@ -22,7 +28,7 @@ export class RazerDeviceKeyboard extends RazerDevice {
   }
 
   getSerializeIgnoredProperties() {
-    return super.getSerializeIgnoredProperties().concat(['rippleAnimation', 'wheelAnimation']);
+    return super.getSerializeIgnoredProperties().concat(['rippleAnimation', 'wheelAnimation', 'starlightRippleAnimation']);
   }
 
   getState() {
@@ -43,6 +49,9 @@ export class RazerDeviceKeyboard extends RazerDevice {
     }
     if(this.wheelAnimation != null) {
       this.wheelAnimation.destroy();
+    }
+    if(this.starlightRippleAnimation != null) {
+      this.starlightRippleAnimation.destroy();
     }
   }
 
@@ -108,6 +117,25 @@ export class RazerDeviceKeyboard extends RazerDevice {
     if(this.wheelAnimation != null) {
       this.wheelAnimation.stop();
     }
+    if(this.starlightRippleAnimation != null) {
+      this.starlightRippleAnimation.stop();
+    }
+  }
+
+  applyStartupEffect() {
+    const ripple = this.getFeature(FeatureIdentifier.RIPPLE);
+    if (!ripple || !ripple.configuration || ripple.configuration.rows < 1 || ripple.configuration.cols < 1) {
+      return false;
+    }
+    this.setStarlightRipple(ripple.configuration);
+    return true;
+  }
+
+  setStarlightRipple(featureConfiguration) {
+    this.setModeState('starlightRipple', [featureConfiguration]);
+    this.stopAnimations();
+    this.starlightRippleAnimation = new RazerAnimationStarlightRipple(this, featureConfiguration);
+    this.starlightRippleAnimation.start();
   }
 
   setRippleEffect(featureConfiguration, color, backgroundColor) {

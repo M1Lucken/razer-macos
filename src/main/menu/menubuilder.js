@@ -27,6 +27,14 @@ function patch(deviceMenu, application) {
 function getMainMenu(application) {
   return [
     {
+      label: 'Open at Login',
+      type: 'checkbox',
+      checked: application.launchAtLogin,
+      click() {
+        application.setLaunchAtLogin(!application.launchAtLogin);
+      },
+    },
+    {
       label: 'Refresh Device List',
       click() {
         application.refreshTray(true);

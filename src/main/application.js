@@ -25,12 +25,15 @@ export class Application {
 
     // Init the main application
     this.razerApplication = new RazerApplication();
+    this.launchAtLogin = true;
   }
 
   initListeners() {
     this.app.on('ready', () => {
-      this.createTray();
-      this.createWindow();
+      this.loadLaunchAtLogin().finally(() => {
+        this.createTray();
+        this.createWindow();
+      });
     });
 
     this.app.on('quit', () => {
@@ -327,5 +330,37 @@ export class Application {
 
   quit() {
     this.app.quit();
+  }
+
+  async loadLaunchAtLogin() {
+    try {
+      const settings = this.razerApplication.settingsManager;
+      if (await settings.hasKey('launchAtLogin')) {
+        const value = await settings.getKey('launchAtLogin');
+        this.launchAtLogin = value.enabled !== false;
+      } else {
+        this.launchAtLogin = true;
+        await settings.setKey('launchAtLogin', { enabled: true });
+      }
+    } catch (error) {
+      this.launchAtLogin = true;
+    }
+    this.applyLaunchAtLogin();
+  }
+
+  applyLaunchAtLogin() {
+    if (!this.app.isPackaged) {
+      return;
+    }
+    this.app.setLoginItemSettings({
+      openAtLogin: !!this.launchAtLogin,
+      openAsHidden: true,
+    });
+  }
+
+  setLaunchAtLogin(enabled) {
+    this.launchAtLogin = enabled;
+    this.applyLaunchAtLogin();
+    return this.razerApplication.settingsManager.setKey('launchAtLogin', { enabled });
   }
 }

@@ -31,10 +31,40 @@ export class StateManager {
       await this.createNewState();
     }
 
-    //check for resets on load
     if(withOnStartState) {
-      await this.changeToState(this.stateOnStart);
+      if (this.stateOnStart) {
+        await this.changeToState(this.stateOnStart);
+      } else {
+        await this.applyBuiltinStartup();
+      }
     }
+  }
+
+  async applyBuiltinStartup() {
+    let applied = false;
+    this.devices.forEach((device) => {
+      if (typeof device.applyStartupEffect === 'function' && device.applyStartupEffect()) {
+        applied = true;
+      }
+    });
+    if (!applied) {
+      return;
+    }
+
+    const startupName = 'Startup lighting';
+    const startupState = {
+      name: startupName,
+      states: this.devices.map((device) => {
+        return {
+          deviceId: device.productId,
+          state: device.getState(),
+        };
+      }),
+    };
+    this.savedStates = (this.savedStates || []).filter((state) => state.name !== startupName);
+    this.savedStates.push(startupState);
+    this.stateOnStart = startupName;
+    await this.save();
   }
 
   async createNewState() {
@@ -201,6 +231,12 @@ export class StateManager {
         break;
       case 'wheel':
         device.setWheelEffect(state.args[0], state.args[1]);
+        break;
+      case 'starlightRipple':
+        device.setStarlightRipple(state.args[0]);
+        break;
+      case 'ledEffect':
+        device.setLogoLEDEffect(state.args);
         break;
       default:
         console.error('Unknown State mode ' + state.mode);

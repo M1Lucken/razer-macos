@@ -14,7 +14,7 @@
 
 ## Download
 
-[Latest release](https://github.com/1kc/razer-macos/releases)
+[Latest release](https://github.com/M1Lucken/razer-macos/releases)
 
 ## Installation instructions
 
@@ -221,7 +221,7 @@ Ongoing new device support will be provided on a volunteer contribution basis, a
 
 ## Developer usage
 
-    git clone --recursive https://github.com/1kc/razer-macos.git
+    git clone --recursive https://github.com/M1Lucken/razer-macos.git
 
 Ensure xcode command line tools are installed,
 
