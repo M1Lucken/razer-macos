@@ -1,6 +1,6 @@
 <p align="center">
   <img src="resources/hero.png" alt="keyboard demo pic" />
-  <p align="center">Open source color effects manager for Razer devices on macOS</p>
+  <p align="center">Open source color effects manager for Razer devices on current macOS</p>
 </p>
 
 <p align="center">
@@ -10,7 +10,7 @@
 - **Supporting Razer devices** Keyboards, mice, mouse mats, eGPUs and blade laptops
 - **Custom color picking** Choose your own colors for static, reactive and starlight effects
 - **Persistent color settings** Color effects are saved to onboard memory
-- **Works on the latest macOS** Including Intel and Apple Silicon. There are no current plans from Razer to support macOS ([source](https://mysupport.razer.com/app/answers/detail/a_id/1381/kw/macOS))
+- **Supports current macOS** Tested on macOS 27, including Apple Silicon. This fork targets current macOS rather than older releases such as High Sierra or Monterey. Razer does not provide macOS software for these devices ([source](https://mysupport.razer.com/app/answers/detail/a_id/1381/kw/macOS))
 
 ## Download
 
@@ -19,7 +19,9 @@
 ## Installation instructions
 
 Install by drag and drop to Applications.
-If you get a security warning when opening the app, you need to go to your Mac's "System Preferences", "Security and Privacy", "General" and click "Open" at the bottom to allow Razer macOS to run.
+If you get a security warning when opening the app, you need to go to your Mac's "System Settings", "Privacy & Security" and allow Razer macOS to run.
+
+Key ripple listens for key presses. The first time that effect starts, macOS asks for Input Monitoring permission. Allow Razer macOS (or Electron, when running a development build) under System Settings → Privacy & Security → Input Monitoring. The app is listed there only after it starts listening.
 
 Please see FAQ section below if color changes are not working, otherwise open a new issue.
 
@@ -235,13 +237,15 @@ If you have a paid Apple Developer account, edit `release.sh` with your details.
 
  Or build manually:
 
-Install node package dependencies:
+Install node package dependencies. This also builds the USB driver for Electron, and needs Homebrew Python 3.11 (`brew install python@3.11`):
 
     yarn
 
 Run development server:
 
     yarn dev
+
+`yarn dev` keeps running in that terminal. It does not start at login, and it stops when the terminal closes. A packaged app in `/Applications` is what opens on its own.
 
 During development, every time the driver code has been updated, a rebuild is required:
 

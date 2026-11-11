@@ -164,6 +164,24 @@ export class StateManager {
     });
   }
 
+  async saveCurrentAsStartup() {
+    const startupName = 'Startup lighting';
+    const startupState = {
+      name: startupName,
+      states: this.devices.map((device) => {
+        return {
+          deviceId: device.productId,
+          state: device.getState(),
+        };
+      }),
+    };
+    this.savedStates = (this.savedStates || []).filter((state) => state.name !== startupName);
+    this.savedStates.push(startupState);
+    this.stateOnStart = startupName;
+    await this.save();
+    return startupState;
+  }
+
   async addState(stateName) {
     const newState = {
       name: stateName,
@@ -181,15 +199,11 @@ export class StateManager {
 
   async removeState(stateName) {
     this.savedStates = this.savedStates.filter(state => state.name !== stateName);
-    if (this.stateOnWake === stateName) {
-      this.stateOnWake = null;
-    }
-    if (this.stateOnSleep === stateName) {
-      this.stateOnSleep = null;
-    }
-    if (this.stateOnRefresh === stateName) {
-      this.stateOnRefresh = null;
-    }
+    ['stateOnStart', 'stateOnResume', 'stateOnSuspend', 'stateOnAc', 'stateOnBattery', 'stateOnShutdown', 'stateOnLockScreen', 'stateOnUnlockScreen', 'stateOnUserDidBecomeActive', 'stateOnUserDidResignActive'].forEach((key) => {
+      if (this[key] === stateName) {
+        this[key] = null;
+      }
+    });
     await this.save();
   }
 

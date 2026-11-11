@@ -169,6 +169,9 @@ export class Application {
     ipcMain.on('state-settings-add', async (event, stateName) => {
       event.returnValue = await this.razerApplication.stateManager.addState(stateName);
     });
+    ipcMain.on('state-settings-save-startup', async (event) => {
+      event.returnValue = await this.razerApplication.stateManager.saveCurrentAsStartup();
+    });
     ipcMain.on('state-settings-remove', (event, stateName) => {
       this.razerApplication.stateManager.removeState(stateName);
     });

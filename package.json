@@ -1,15 +1,18 @@
 {
   "name": "razer-macos",
   "version": "0.4.11",
-  "description": "Open source color effects manager for Razer peripherals on macOS",
+  "description": "Open source color effects manager for Razer peripherals on current macOS",
   "license": "GPL-2.0-only",
   "main": "src/main/index.js",
   "scripts": {
     "dev": "electron-webpack dev",
+    "predev": "node scripts/patch-webpack-hash.js",
     "compile": "electron-webpack",
+    "precompile": "node scripts/patch-webpack-hash.js",
     "dist": "yarn compile && electron-builder",
     "dist:dir": "yarn dist --dir -c.compression=store -c.mac.identity=null",
-    "rebuild": "node-gyp rebuild",
+    "install": "node scripts/rebuild-native.js",
+    "rebuild": "node scripts/rebuild-native.js",
     "clean": "node-gyp clean",
     "prettier:js": "prettier --write \"src/{main,renderer}/**/*.{js,jsx}\""
   },
@@ -60,6 +63,7 @@
     "appId": "com.electron.razer-macos",
     "productName": "Razer macOS",
     "nodeGypRebuild": true,
+    "asar": false,
     "directories": {
       "output": "dist",
       "buildResources": "resources"

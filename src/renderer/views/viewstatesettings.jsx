@@ -13,8 +13,7 @@ export class ViewStateSettings extends React.Component {
       return { value: state.name, label: state.name };
     });
     const optionsWithNull = this.getOptionsWithNull(options);
-
-    console.log(this.stateManager)
+    const startOptions = this.getStartOptions(options);
 
     this.state = {
       selection: null,
@@ -22,7 +21,8 @@ export class ViewStateSettings extends React.Component {
       isLoading: false,
 
       optionsWithNull: optionsWithNull,
-      selectionStart: optionsWithNull.find(o => o.value === this.stateManager.stateOnStart),
+      startOptions: startOptions,
+      selectionStart: startOptions.find(o => o.value === this.stateManager.stateOnStart),
       selectionResume: optionsWithNull.find(o => o.value === this.stateManager.stateOnResume),
       selectionSuspend: optionsWithNull.find(o => o.value === this.stateManager.stateOnSuspend),
       selectionAc: optionsWithNull.find(o => o.value === this.stateManager.stateOnAc),
@@ -39,6 +39,33 @@ export class ViewStateSettings extends React.Component {
     return [{
       value: null, label: '--- Default: do nothing ---'
     }].concat(options);
+  }
+
+  getStartOptions(options) {
+    return [{
+      value: null, label: 'Built-in startup lighting'
+    }].concat(options);
+  }
+
+  saveStartup() {
+    const startupState = ipcRenderer.sendSync('state-settings-save-startup');
+    const existing = this.stateManager.savedStates.findIndex(state => state.name === startupState.name);
+    if (existing >= 0) {
+      this.stateManager.savedStates[existing] = startupState;
+    } else {
+      this.stateManager.savedStates.push(startupState);
+    }
+    this.stateManager.stateOnStart = startupState.name;
+    const options = this.stateManager.savedStates.map(state => {
+      return { value: state.name, label: state.name };
+    });
+    const startOptions = this.getStartOptions(options);
+    this.setState({
+      options: options,
+      optionsWithNull: this.getOptionsWithNull(options),
+      startOptions: startOptions,
+      selectionStart: startOptions.find(option => option.value === startupState.name),
+    });
   }
 
   getPropertiesToKeyValues(object) {
@@ -93,7 +120,7 @@ export class ViewStateSettings extends React.Component {
     const newOptions = this.stateManager.savedStates.map(state => {
       return { value: state.name, label: state.name };
     });
-    this.setState({ isLoading:false, selection: newOptions.find(o => o.value === itemName), options: newOptions, optionsWithNull: this.getOptionsWithNull(newOptions) });
+    this.setState({ isLoading:false, selection: newOptions.find(o => o.value === itemName), options: newOptions, optionsWithNull: this.getOptionsWithNull(newOptions), startOptions: this.getStartOptions(newOptions) });
   }
 
   handleClick() {
@@ -255,13 +282,17 @@ export class ViewStateSettings extends React.Component {
         <TabPanel>
           <div>
             <p>Select a state to be activate on application and system events</p>
+            <p>Built-in startup lighting is multicolor starlight with a green key ripple on the keyboard, and a green pulse on the logo and scroll wheel of older mice such as the DeathAdder 2013. Choose another look from the menu bar, then save it as the startup default.</p>
+            <div className={'control'}>
+              <button onClick={() => this.saveStartup()}>Save current lighting as startup default</button>
+            </div>
           </div>
           <div className={'state-selectors'}>
 
             <p>This state will be activated whenever Razer macOS starts or refreshes its devices.</p>
             <div className={'state-selector'}>
               <div>On application start</div>
-              <div><Select value={this.state.selectionStart} options={this.state.optionsWithNull} onChange={(item) => this.selectionChangeStart(item)} styles={customStyles} /></div>
+              <div><Select value={this.state.selectionStart} options={this.state.startOptions} onChange={(item) => this.selectionChangeStart(item)} styles={customStyles} /></div>
             </div>
 
             <p>This state will be activated when the system goes to sleep ('suspend' event).</p>

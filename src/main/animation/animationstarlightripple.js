@@ -2,8 +2,17 @@ import { RazerDeviceAnimation } from './animation';
 import { KEY_MAPPING } from './keymapping';
 
 const BASE = [210, 210, 210];
-const SPARK = [255, 255, 255];
-const RIPPLE = [255, 255, 255];
+const RIPPLE = [0, 255, 0];
+const STAR_COLORS = [
+  [255, 0, 0],
+  [255, 80, 0],
+  [255, 200, 0],
+  [0, 255, 0],
+  [0, 255, 180],
+  [0, 90, 255],
+  [170, 0, 255],
+  [255, 0, 170],
+];
 
 function mix(from, to, amount) {
   return [
@@ -70,7 +79,12 @@ export class RazerAnimationStarlightRipple extends RazerDeviceAnimation {
 
       if (now >= nextSpawn && stars.length < maxStars && this.keys.length > 0) {
         const [row, col] = this.keys[Math.floor(Math.random() * this.keys.length)];
-        stars.push({ row, col, start: now });
+        stars.push({
+          row,
+          col,
+          start: now,
+          color: STAR_COLORS[Math.floor(Math.random() * STAR_COLORS.length)],
+        });
         nextSpawn = now + 0.08 + Math.random() * 0.18;
       }
 
@@ -79,7 +93,7 @@ export class RazerAnimationStarlightRipple extends RazerDeviceAnimation {
       for (const star of stars) {
         const progress = (now - star.start) / starLife;
         const fade = Math.sin(Math.PI * progress);
-        matrix[star.row][star.col] = mix(BASE, SPARK, fade);
+        matrix[star.row][star.col] = mix(BASE, star.color, fade);
       }
 
       for (let row = 0; row < this.nRows; row++) {
